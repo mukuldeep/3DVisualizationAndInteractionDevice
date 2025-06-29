@@ -2,7 +2,7 @@
 #include <Adafruit_MPU6050.h>
 
 Adafruit_MPU6050 mpu;
-static float acc_yaw=0.0;
+  static float accumulatedYaw = 0.0;
 void setup() {
   Serial.begin(9600);
   while (!Serial)
@@ -14,33 +14,22 @@ void setup() {
     while (1);
   }
 
-  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
-  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 }
 
 void loop() {
-  sensors_event_t accel, gyro, temp;
-  mpu.getEvent(&accel, &gyro , &temp);
+  sensors_event_t gyro;
+  mpu.getEvent(NULL, &gyro, NULL);
 
-//  float roll = atan2(accel.acceleration.x, accel.acceleration.z) * 180.0 / PI;
-//  float pitch = atan2(-accel.acceleration.y, sqrt(accel.acceleration.x * accel.acceleration.x + accel.acceleration.z * accel.acceleration.z)) * 180.0 / PI;
-//  float yaw = atan2(accel.acceleration.z, sqrt(accel.acceleration.x * accel.acceleration.x + accel.acceleration.y * accel.acceleration.y)) * 180.0 / PI;
-//
-//
-//  Serial.print("Roll: ");
-//  Serial.print(roll);
-//  Serial.print(" degrees, Pitch: ");
-//  Serial.print(pitch);
-//  Serial.print(" degrees, Yaw: ");
-//  Serial.print(yaw);
-//  Serial.println(" degrees");
-    acc_yaw+=(gyro.gyro.x)+0.093;
-    float angle=-acc_yaw*7;
-    Serial.print("yaw:");
-    Serial.print(acc_yaw);
-    Serial.print(" angle:");
-    Serial.println(angle);
+  float yaw = gyro.gyro.z * 0.1; // Scale gyro rate to get change in yaw angle
 
-  delay(100); // Delay between measurements
+  accumulatedYaw += yaw;
+
+  //Serial.print("Head movement: ");
+  Serial.println(accumulatedYaw);
+  //Serial.println(" degrees");
+
+  delay(10); // Delay between measurements
 }
